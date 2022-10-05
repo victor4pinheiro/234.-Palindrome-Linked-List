@@ -13,62 +13,45 @@ struct ListNode
 
 class Solution {
 public:
-    ListNode *copy(ListNode *source)
-    {
-        if (source == NULL)
-            return NULL;
-
-        ListNode *destination = (ListNode*) malloc(sizeof(ListNode));
-
-        destination->val = source->val;
-        destination->next = copy(source->next);
-
-        return destination;
-    }
-
     ListNode *reverse(ListNode *source)
     {
-        if (source == NULL || source->next == NULL)
-            return source;
- 
-        ListNode *reversed = reverse(source->next);
-        source->next->next = source;
-        source->next = NULL;
- 
-        return reversed;
+        ListNode *previous = NULL;
+        ListNode *current = source;
+        while (current != NULL) {
+            ListNode *nextTemp = current->next;
+            current->next = previous;
+            previous = current;
+            current = nextTemp;
+        }
+        return previous;
     }
 
-    bool isPalindrome(ListNode *head)
-    {
-        int sizeLinkedList = size(head);
-        ListNode *tmp = copy(head);
-        ListNode *tmpReversed = reverse(tmp);
+    bool isPalindrome(ListNode *head) {
+        if (head == NULL) return true;
 
-        int length = 0;
+        ListNode *firstHalfEnd = endOfFirstHalf(head);
+        ListNode *secondHalfStart = reverse(firstHalfEnd->next);
 
-        while (head->next != NULL) {
-            if (head->val == tmpReversed->val)
-                length++;
+        ListNode *p1 = head;
+        ListNode *p2 = secondHalfStart;
+        bool result = true;
+        while (result && p2 != NULL) {
+            if (p1->val != p2->val) result = false;
+            p1 = p1->next;
+            p2 = p2->next;
+        }        
 
-            head = head->next;
-            tmpReversed = tmpReversed->next;
-        }
-
-        if (length == sizeLinkedList)
-            return true;
-
-        return false;
+        firstHalfEnd->next = reverse(secondHalfStart);
+        return result;
     }
 
-    int size(ListNode *head)
-    {
-        int length = 0;
-        while (head->next != NULL)
-        {
-            head = head->next;
-            length++;
+    ListNode *endOfFirstHalf(ListNode *head) {
+        ListNode *fast = head;
+        ListNode *slow = head;
+        while (fast->next != NULL && fast->next->next != NULL) {
+            fast = fast->next->next;
+            slow = slow->next;
         }
-
-        return length;
+        return slow;
     }
 };
